@@ -37,14 +37,27 @@ def call_llm(
     for _ in range(20):
 
         # Call the API
-        response = llm_client.models.generate_content(
-            model="gemini-2.0-flash-001",
-            contents=msgs,
-            config=types.GenerateContentConfig(
-                tools=[AVAILABLE_FUNC],
-                system_instruction=SYSTEM_PROMPT
+        try:
+            response = llm_client.models.generate_content(
+                model="gemini-2.0-flash-001",
+                contents=msgs,
+                config=types.GenerateContentConfig(
+                    tools=[AVAILABLE_FUNC],
+                    system_instruction=SYSTEM_PROMPT
+                )
             )
-        )
+        except Exception as err:
+            error_msg = types.Content(
+                role="tool",
+                parts=[
+                    types.Part.from_function_response(
+                        name="llm_client.models.generate_content",
+                        response={"error": f"Error occured while performing: llm_client.models.generate_content: {err}"},
+                    )
+                ],
+            )
+            msgs.append(error_msg)
+            continue
 
         # Check for the response
         if response.text:
