@@ -8,6 +8,7 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from pyinstrument import Profiler
 
 from config import SYSTEM_PROMPT
 from functions.call_function import AVAILABLE_FUNC, call_function
@@ -109,6 +110,11 @@ def main(args):
     # Call the LLM
     call_llm(gem_client, messages, args, verbose)
 
-
 if __name__ == "__main__":
+    profiler = Profiler()
+    profiler.start()
+
     main(sys.argv)
+
+    profiler.stop()
+    print(profiler.output_text(unicode=True, color=True))
